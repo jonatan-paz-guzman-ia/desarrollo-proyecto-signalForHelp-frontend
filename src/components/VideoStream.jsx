@@ -1,35 +1,9 @@
-/*import React, { useEffect, useState } from "react";
-import { connectSocket } from "../services/api";
-
-function VideoStream() {
-  const [frames, setFrames] = useState([]);
-
-  useEffect(() => {
-    const socket = connectSocket();
-    socket.on("frame", (data) => {
-      setFrames((prev) => [...prev.slice(-10), data]); // mantener últimos 10 frames
-    });
-
-    return () => socket.disconnect();
-  }, []);
-
-  return (
-    <div>
-      <h2>Streaming en Tiempo Real</h2>
-      {frames.length > 0 && (
-        <img src={`data:image/jpeg;base64,${frames[frames.length - 1]}`} alt="stream" />
-      )}
-    </div>
-  );
-}
-
-export default VideoStream;*/
-
 import React, { useEffect, useRef, useState } from "react";
 
 function VideoStream() {
   const videoRef = useRef(null);
   const [frame, setFrame] = useState(null);
+  const [detections, setDetections] = useState([]);
 
   useEffect(() => {
     let interval;
@@ -38,9 +12,11 @@ function VideoStream() {
         videoRef.current.srcObject = stream;
         videoRef.current.play();
 
-        const socket = new WebSocket("ws://127.0.0.1:8000/ws/video");
+        const socket = new WebSocket("ws://127.0.0.1:8000/api/segment-video");
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
+
+        socket.binaryType = "arraybuffer"; // importante para enviar bytes
 
         socket.onopen = () => {
           console.log("Conectado al WS");
@@ -50,14 +26,21 @@ function VideoStream() {
               canvas.width = videoRef.current.videoWidth;
               canvas.height = videoRef.current.videoHeight;
               ctx.drawImage(videoRef.current, 0, 0);
-              const data = canvas.toDataURL("image/jpeg");
-              socket.send(data); // enviar frame al backend
+              canvas.toBlob((blob) => {
+                if (blob) {
+                  blob.arrayBuffer().then((buffer) => {
+                    socket.send(buffer); // ahora enviamos bytes crudos
+                  });
+                }
+              }, "image/jpeg");
             }
           }, 200);
         };
 
         socket.onmessage = (event) => {
-          setFrame(`data:image/jpeg;base64,${event.data}`);
+          const msg = JSON.parse(event.data);
+          setFrame(`data:image/jpeg;base64,${msg.image_base64}`);
+          setDetections(msg.detections);
         };
 
         socket.onclose = () => console.log("WS cerrado");
@@ -77,6 +60,9 @@ function VideoStream() {
       <h2>Predicción en Tiempo Real</h2>
       <video ref={videoRef} style={{ display: "none" }} />
       {frame && <img src={frame} alt="stream procesado" />}
+      {detections.length > 0 && (
+        <pre>{JSON.stringify(detections, null, 2)}</pre>
+      )}
     </div>
   );
 }
