@@ -23,13 +23,13 @@ function VideoStream() {
 
           interval = setInterval(() => {
             if (videoRef.current && videoRef.current.videoWidth > 0) {
-              // ⚡ Ajuste 1: reducir resolución (menos píxeles = más rápido)
+              // Ajuste 1: reducir resolución (menos píxeles = más rápido)
               canvas.width = 320;
               canvas.height = 240;
 
               ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
 
-              // ⚡ Ajuste 3: compresión JPEG al 50%
+              // Ajuste 3: compresión JPEG al 50%
               canvas.toBlob((blob) => {
                 if (blob) {
                   blob.arrayBuffer().then((buffer) => {
@@ -38,7 +38,7 @@ function VideoStream() {
                 }
               }, "image/jpeg", 0.5);
             }
-          }, 500); // ⚡ Ajuste 2: enviar cada 500 ms (~2 fps)
+          }, 500); // Ajuste 2: enviar cada 500 ms (~2 fps)
         };
 
         socket.onmessage = (event) => {
