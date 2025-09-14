@@ -16,25 +16,29 @@ function VideoStream() {
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
 
-        socket.binaryType = "arraybuffer"; // importante para enviar bytes
+        socket.binaryType = "arraybuffer"; // enviar bytes puros
 
         socket.onopen = () => {
           console.log("Conectado al WS");
 
           interval = setInterval(() => {
-            if (videoRef.current) {
-              canvas.width = videoRef.current.videoWidth;
-              canvas.height = videoRef.current.videoHeight;
-              ctx.drawImage(videoRef.current, 0, 0);
+            if (videoRef.current && videoRef.current.videoWidth > 0) {
+              // ⚡ Ajuste 1: reducir resolución (menos píxeles = más rápido)
+              canvas.width = 320;
+              canvas.height = 240;
+
+              ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+
+              // ⚡ Ajuste 3: compresión JPEG al 50%
               canvas.toBlob((blob) => {
                 if (blob) {
                   blob.arrayBuffer().then((buffer) => {
-                    socket.send(buffer); // ahora enviamos bytes crudos
+                    socket.send(buffer);
                   });
                 }
-              }, "image/jpeg");
+              }, "image/jpeg", 0.5);
             }
-          }, 200);
+          }, 500); // ⚡ Ajuste 2: enviar cada 500 ms (~2 fps)
         };
 
         socket.onmessage = (event) => {
