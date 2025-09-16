@@ -1,7 +1,9 @@
 import axios from "axios";
 import { io } from "socket.io-client";
 
-const API_URL = "http://localhost:8000"; // backend FastAPI
+// Usa la variable de entorno o un fallback
+const DIR_IP = import.meta.env.VITE_API_URL || "//localhost:8000";
+const API_URL = `http:${DIR_IP}`;
 
 export async function uploadImage(file) {
   const formData = new FormData();
