@@ -12,7 +12,11 @@ function VideoStream() {
         videoRef.current.srcObject = stream;
         videoRef.current.play();
 
-        const socket = new WebSocket("ws://127.0.0.1:8000/api/segment-video");
+        // Usa variable de entorno o fallback
+
+        const DIR_IP = import.meta.env.VITE_API_URL || "//localhost:8000";
+        const WS_URL = `ws:${DIR_IP}`;
+        const socket = new WebSocket(`${WS_URL}/api/segment-video`);
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
 
