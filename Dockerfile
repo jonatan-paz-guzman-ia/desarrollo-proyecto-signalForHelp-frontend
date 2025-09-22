@@ -18,7 +18,6 @@ COPY . .
 # Compilar la app para producción
 RUN npm run build
 
-
 # --------------------------
 # STAGE 2: Run
 # --------------------------
@@ -30,7 +29,7 @@ RUN rm -rf /usr/share/nginx/html/*
 # Copiar el build generado al directorio que sirve Nginx
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Copiar archivo de configuración de Nginx (opcional, si quieres rutas SPA)
+# Copiar archivo de configuración de Nginx (para SPA con rutas limpias)
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Exponer puerto
