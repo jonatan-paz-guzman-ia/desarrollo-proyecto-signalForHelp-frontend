@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+spec:
+  type: LoadBalancer         # Crea una IP pública en Azure
+  selector:
+    app: frontend
+  ports:
+    - protocol: TCP
+      port: 80               # Puerto público
+      targetPort: 80         # Debe coincidir con containerPort del deployment
