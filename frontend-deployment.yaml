@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+  labels:
+    app: frontend
+spec:
+  replicas: 2               # número de pods del frontend
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: jonatanpazguzman/signal-for-help-frontend:latest   # <-- pon aquí tu imagen real
+          ports:
+            - containerPort: 80     # Puerto en el contenedor (ajústalo si usas otro)
+          env:
+            - name: VITE_API_URL
+              value: "//52.177.240.12:80"   # Cambia por la IP/DNS de tu backend
+            - name: NODE_ENV
+              value: "production"
